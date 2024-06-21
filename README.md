@@ -5,6 +5,8 @@ Dust is a lightweight web framework written in Python, designed to be simple and
 ## Features
 
 - Simple and intuitive routing
+- Support for all HTTP methods (GET, POST, PUT, DELETE, etc.)
+- WebSocket support
 - Custom response types (JSON, HTML, etc.)
 - Middleware support (planned)
 - Extensible and lightweight
@@ -60,16 +62,20 @@ dust/
 │   ├── __init__.py
 │   ├── application.py
 │   ├── routing.py
-│   └── responses.py
+│   ├── responses.py
+│   └── websockets.py
 ├── tests/
 │   ├── __init__.py
 │   ├── test_application.py
 │   ├── test_routing.py
-│   └── test_responses.py
+│   ├── test_responses.py
+│   └── test_websockets.py
 ├── examples/
 │   ├── __init__.py
 │   └── app.py
 ├── .gitignore
 ├── setup.py
-└── README.md
+├── README.md
+├── License
+└── CONTRIBUTING.md
 ```

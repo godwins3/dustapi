@@ -2,6 +2,7 @@
 
 from dust.application import Application
 from dust.responses import JsonResponse, HtmlResponse
+import asyncio
 
 app = Application()
 
@@ -30,5 +31,10 @@ def update_data(request):
 def delete_data(request):
     return "Data received via DELETE"
 
+@app.websocket('/ws')
+async def echo(websocket, path):
+    async for message in websocket:
+        await websocket.send(f"Echo: {message}")
+
 if __name__ == '__main__':
-    app.run('localhost', 5000, app)
+    app.run(host='localhost', port=5000)
