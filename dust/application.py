@@ -1,5 +1,3 @@
-# my_web_framework/application.py
-
 from werkzeug.wrappers import Request
 from .routing import Router
 from .responses import Response
