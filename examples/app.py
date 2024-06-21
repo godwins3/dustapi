@@ -1,10 +1,20 @@
-# examples/app.py
-
 from dust.application import Application
 from dust.responses import JsonResponse, HtmlResponse
-import asyncio
+import os
 
 app = Application()
+
+UPLOAD_FOLDER = 'uploads'
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+def save_uploaded_file(file_data, upload_folder):
+    filename = file_data['filename']
+    filepath = os.path.join(upload_folder, filename)
+    with open(filepath, 'wb') as f:
+        f.write(file_data['content'])
+
+    return filename
 
 @app.route('/', methods=['GET'])
 def home(request):
@@ -30,6 +40,17 @@ def update_data(request):
 @app.route('/delete', methods=['DELETE'])
 def delete_data(request):
     return "Data received via DELETE"
+
+@app.route('/upload', methods=['POST'])
+def upload_file(request):
+    if 'file' not in request.form:
+        return "No file part in the request"
+    
+    file_data = request.form['file']
+    filename = file_data['filename']
+    filepath = save_uploaded_file(file_data, UPLOAD_FOLDER)
+
+    return f"File {filename} uploaded successfully"
 
 @app.websocket('/ws')
 async def echo(websocket, path):
