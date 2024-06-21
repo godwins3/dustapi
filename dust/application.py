@@ -1,4 +1,5 @@
 from werkzeug.wrappers import Request
+from werkzeug.serving import run_simple
 from .routing import Router
 from .responses import Response
 
@@ -21,3 +22,6 @@ class Application:
 
     def __call__(self, environ, start_response):
         return self.wsgi_app(environ, start_response)
+    
+    def run(self, host='localhost', port=5000):
+        run_simple(host, port, self)
