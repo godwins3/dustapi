@@ -28,6 +28,20 @@ pip install -r requirements.txt
 
 Here is a simple example of how to create a web application using Dust:
 
+### Create a dust project
+
+```bash
+dust createproject
+```
+
+### Run dust server
+
+```bash
+dust runserver --host 0.0.0.0 --port 8000 --template-folder mytemplates --static-folder mystatic --log-file myapp.log
+```
+
+### Example
+
 ```bash
 # examples/app.py
 
@@ -52,30 +66,4 @@ def json_example(request):
 if __name__ == '__main__':
     from werkzeug.serving import run_simple
     run_simple('localhost', 5000, app)
-```
-
-## Project structure
-
-```bash
-dust/
-├── dust/
-│   ├── __init__.py
-│   ├── application.py
-│   ├── routing.py
-│   ├── responses.py
-│   └── websockets.py
-├── tests/
-│   ├── __init__.py
-│   ├── test_application.py
-│   ├── test_routing.py
-│   ├── test_responses.py
-│   └── test_websockets.py
-├── examples/
-│   ├── __init__.py
-│   └── app.py
-├── .gitignore
-├── setup.py
-├── README.md
-├── License
-└── CONTRIBUTING.md
 ```
