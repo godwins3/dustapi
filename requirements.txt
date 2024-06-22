@@ -6,3 +6,4 @@ pydantic==1.10.13
 setuptools==68.2.2
 typer==0.12.3
 Werkzeug==2.2.3
+websockets==12.0
