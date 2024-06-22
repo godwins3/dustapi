@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "dust"
+version = "0.1.0"
+description = "Description of your project."
+authors = ["c0d3g0d"]
+
+dependancies = [
+    "click==8.1.7",
+    "Jinja2==3.1.3",
+    "material==0.1",
+    "mkdocs==1.6.0",
+    "pydantic==1.10.13",
+    "setuptools==68.2.2",
+    "typer==0.12.3",
+    "Werkzeug==2.2.3",
+    "websockets==12.0",
+]
+
+
+# Specifies the Python compatibility
+python = "^3.9"
+
+# Specifies the dependencies of your project
+[tool.poetry.dependencies]
+# Example dependencies
+python = "^3.11"
+dust = {path = "./dust"}  # Adjust the path to your dust package
+
+# Development dependencies (for testing and development tools)
+[tool.poetry.dev-dependencies]
+pytest = "^7.0"
+
+# Optional: Specify additional dependencies here if needed
+
+# Specifies the build system and dependencies
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
