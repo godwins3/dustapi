@@ -7,6 +7,10 @@ import asyncio
 import websockets
 import threading
 import os
+import contextvars
+
+# Create a context variable to store the request
+request_context = contextvars.ContextVar('request')
 
 class Application:
     def __init__(self, template_folder='templates'):
@@ -19,7 +23,9 @@ class Application:
 
     def route(self, path, methods=["GET"]):
         def wrapper(handler):
-            self.router.add_route(path, handler, methods)
+            async def wrapped_handler(*args, **kwargs):
+                return await handler()
+            self.router.add_route(path, wrapped_handler, methods)
             return handler
         return wrapper
 
@@ -56,10 +62,13 @@ class Application:
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
         request.form = self.parse_form_data(environ)
+        token = request_context.set(request)  # Set the request context
 
         response = self.router.dispatch(request)
         if not isinstance(response, Response):
             response = Response(response)
+        
+        request_context.reset(token)  # Reset the context
         return response(environ, start_response)
 
     def __call__(self, environ, start_response):
@@ -74,3 +83,6 @@ class Application:
 
         threading.Thread(target=run_http).start()
         threading.Thread(target=run_ws).start()
+
+def get_request():
+    return request_context.get()
