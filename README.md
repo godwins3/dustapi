@@ -10,6 +10,8 @@ Dust is a lightweight web framework written in Python, designed to be simple and
 - Custom response types (JSON, HTML, etc.)
 - Middleware support (planned)
 - Extensible and lightweight
+- Auto generate docs with swagger
+- Support for jwt and session manager
 
 ## Installation
 
