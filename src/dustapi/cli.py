@@ -1,5 +1,5 @@
 import click
-from dust.application import Application
+from dustapi.application import Application
 import os
 
 @click.group()

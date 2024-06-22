@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='dust',
+    name='dustapi',
     version='0.0.1',
     packages=find_packages(),
     description='Fast light weight web server',
