@@ -6,7 +6,7 @@ Learn more about it below. 👇
 
 ## Versions
 
-The latest version of FastAPI is supported.
+The latest version of Dust is supported.
 
 You are encouraged to [write tests](https://dust.aoristlabs.co/tutorial/testing/) for your application and update your Dust version frequently after ensuring that your tests are passing. This way you will benefit from the latest features, bug fixes, and **security fixes**.
 
