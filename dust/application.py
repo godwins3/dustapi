@@ -3,7 +3,7 @@ from werkzeug.serving import run_simple
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from .routing import Router
-from .websockets import WebSocketRouter
+from .web_sockets import WebSocketRouter
 from .responses import Response
 from .sessions import SecureCookieSessionInterface
 from .jwt import JWTHandler

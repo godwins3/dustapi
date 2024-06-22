@@ -1,7 +1,8 @@
 # dust/websockets.py
 
 import asyncio
-import websockets
+from websockets.legacy.server import WebSocketServer
+
 
 class WebSocketRouter:
     def __init__(self):
@@ -14,4 +15,4 @@ class WebSocketRouter:
         if path in self.routes:
             await self.routes[path](websocket, path)
         else:
-            await websocket.close()
+            await WebSocketServer.close()
