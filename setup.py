@@ -25,6 +25,7 @@ setup(
         'click',
         'websockets',
         'mkdocs',
+        'pyjwt',
     ],
     entry_points={
         'console_scripts': [

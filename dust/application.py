@@ -1,3 +1,4 @@
+from werkzeug.utils import secure_filename
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 from werkzeug.middleware.shared_data import SharedDataMiddleware
@@ -5,6 +6,8 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from .routing import Router
 from .websockets import WebSocketRouter
 from .responses import Response
+from .sessions import SecureCookieSessionInterface
+from .jwt import JWTHandler
 import asyncio
 import websockets
 import threading
@@ -16,7 +19,7 @@ import logging
 request_context = contextvars.ContextVar('request')
 
 class Application:
-    def __init__(self, template_folder='templates', static_folder='static', static_url_path='/static', log_file='dust.log'):
+    def __init__(self, template_folder='templates', static_folder='static', static_url_path='/static', log_file='app.log', secret_key='supersecretkey', jwt_secret_key='jwtsecretkey'):
         self.router = Router()
         self.ws_router = WebSocketRouter()
         self.template_env = Environment(
@@ -27,6 +30,9 @@ class Application:
         self.static_url_path = static_url_path
         self.error_handlers = {}
         self.logger = self.setup_logger(log_file)
+        self.secret_key = secret_key
+        self.session_interface = SecureCookieSessionInterface(secret_key)
+        self.jwt_handler = JWTHandler(jwt_secret_key)
 
         # Middleware to serve static files
         self.shared_data = SharedDataMiddleware(self.wsgi_app, {
@@ -112,6 +118,7 @@ class Application:
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
         request.form = self.parse_form_data(environ)
+        request.session = self.session_interface.open_session(request)
         token = request_context.set(request)  # Set the request context
 
         try:
@@ -122,6 +129,7 @@ class Application:
             response = self.handle_exception(exc)
 
         self.log_request(request, response)  # Log the request details
+        self.session_interface.save_session(request, response, request.session)
         request_context.reset(token)  # Reset the context
         return response(environ, start_response)
 
