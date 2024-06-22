@@ -1,6 +1,7 @@
 import os
 import json
 from .responses import JsonResponse
+from werkzeug.utils import secure_filename
 
 def save_uploaded_file(file_data, upload_folder):
     """Save uploaded file to the specified folder."""

@@ -1,4 +1,3 @@
-from werkzeug.utils import secure_filename
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 from werkzeug.middleware.shared_data import SharedDataMiddleware
