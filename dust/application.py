@@ -1,5 +1,6 @@
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
+from werkzeug.middleware.shared_data import SharedDataMiddleware
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from .routing import Router
 from .websockets import WebSocketRouter
@@ -13,13 +14,20 @@ import contextvars
 request_context = contextvars.ContextVar('request')
 
 class Application:
-    def __init__(self, template_folder='templates'):
+    def __init__(self, template_folder='templates', static_folder='static', static_url_path='/static'):
         self.router = Router()
         self.ws_router = WebSocketRouter()
         self.template_env = Environment(
             loader=FileSystemLoader(template_folder),
             autoescape=select_autoescape(['html', 'xml'])
         )
+        self.static_folder = static_folder
+        self.static_url_path = static_url_path
+
+        # Middleware to serve static files
+        self.shared_data = SharedDataMiddleware(self.wsgi_app, {
+            static_url_path: os.path.join(os.getcwd(), static_folder)
+        })
 
     def route(self, path, methods=["GET"]):
         def wrapper(handler):
@@ -72,7 +80,7 @@ class Application:
         return response(environ, start_response)
 
     def __call__(self, environ, start_response):
-        return self.wsgi_app(environ, start_response)
+        return self.shared_data(environ, start_response)
 
     def run(self, host='localhost', port=5000):
         def run_http():
