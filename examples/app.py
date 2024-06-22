@@ -1,5 +1,5 @@
 from dust.application import Application, get_request
-from dust.responses import JsonResponse, HtmlResponse
+from dust.responses import JsonResponse, HtmlResponse, Response
 import os
 
 app = Application()
@@ -17,8 +17,7 @@ def save_uploaded_file(file_data, upload_folder):
 
 @app.route('/', methods=['GET'])
 async def home():
-    request = get_request()
-    return app.render_template('index.html', title="Home", heading="Welcome to Dust Framework", content="This is the home page.")
+    return app.render_template('example_template.html', title="Home", heading="Welcome to Dust Framework", content="This is the home page.")
 
 @app.route('/hello', methods=['GET'])
 async def hello():
@@ -45,7 +44,7 @@ async def delete_data():
 async def upload_file():
     request = get_request()
     if 'file' not in request.form:
-        return "No file part in the request"
+        raise ValueError("No file part in the request")
     
     file_data = request.form['file']
     filename = file_data['filename']
@@ -57,6 +56,16 @@ async def upload_file():
 async def echo(websocket, path):
     async for message in websocket:
         await websocket.send(f"Echo: {message}")
+
+# Custom error handler for ValueError
+@app.errorhandler(ValueError)
+def handle_value_error(exc):
+    return Response(str(exc), status=400)
+
+# Custom error handler for generic exceptions
+@app.errorhandler(Exception)
+def handle_generic_exception(exc):
+    return Response("An unexpected error occurred.", status=500)
 
 if __name__ == '__main__':
     app.run(host='localhost', port=5000)

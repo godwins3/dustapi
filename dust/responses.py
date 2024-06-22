@@ -1,12 +1,12 @@
+
 from werkzeug.wrappers import Response as WerkzeugResponse
 import json
 
 class Response(WerkzeugResponse):
-    def __init__(self, response=None, status=200, headers=None, content_type='text/plain'):
-        if headers is None:
-            headers = {}
-        headers['Content-Type'] = content_type
-        super().__init__(response, status, headers)
+    def __init__(self, response=None, status=None, headers=None, content_type=None):
+        super().__init__(response=response, status=status, headers=headers)
+        if content_type:
+            self.headers['Content-Type'] = content_type
 
 class JsonResponse(Response):
     def __init__(self, data, status=200, headers=None):

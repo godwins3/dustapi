@@ -1,9 +1,10 @@
-from werkzeug.wrappers import Request, Response
+from werkzeug.wrappers import Request
 from werkzeug.serving import run_simple
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from .routing import Router
 from .websockets import WebSocketRouter
+from .responses import Response
 import asyncio
 import websockets
 import threading
@@ -23,6 +24,7 @@ class Application:
         )
         self.static_folder = static_folder
         self.static_url_path = static_url_path
+        self.error_handlers = {}
 
         # Middleware to serve static files
         self.shared_data = SharedDataMiddleware(self.wsgi_app, {
@@ -67,15 +69,30 @@ class Application:
 
         return form
 
+    def handle_exception(self, exc):
+        handler = self.error_handlers.get(type(exc))
+        if handler:
+            return handler(exc)
+        return Response("Internal Server Error", status=500)
+
+    def errorhandler(self, exc_class):
+        def decorator(func):
+            self.error_handlers[exc_class] = func
+            return func
+        return decorator
+
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
         request.form = self.parse_form_data(environ)
         token = request_context.set(request)  # Set the request context
 
-        response = self.router.dispatch(request)
-        if not isinstance(response, Response):
-            response = Response(response)
-        
+        try:
+            response = self.router.dispatch(request)
+            if not isinstance(response, Response):
+                response = Response(response)
+        except Exception as exc:
+            response = self.handle_exception(exc)
+
         request_context.reset(token)  # Reset the context
         return response(environ, start_response)
 
