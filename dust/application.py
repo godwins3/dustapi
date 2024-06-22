@@ -1,4 +1,4 @@
-from werkzeug.wrappers import Request
+from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -10,12 +10,13 @@ import websockets
 import threading
 import os
 import contextvars
+import logging
 
 # Create a context variable to store the request
 request_context = contextvars.ContextVar('request')
 
 class Application:
-    def __init__(self, template_folder='templates', static_folder='static', static_url_path='/static'):
+    def __init__(self, template_folder='templates', static_folder='static', static_url_path='/static', log_file='dust.log'):
         self.router = Router()
         self.ws_router = WebSocketRouter()
         self.template_env = Environment(
@@ -25,11 +26,38 @@ class Application:
         self.static_folder = static_folder
         self.static_url_path = static_url_path
         self.error_handlers = {}
+        self.logger = self.setup_logger(log_file)
 
         # Middleware to serve static files
         self.shared_data = SharedDataMiddleware(self.wsgi_app, {
             static_url_path: os.path.join(os.getcwd(), static_folder)
         })
+
+    def setup_logger(self, log_file):
+        logger = logging.getLogger('dust_logger')
+        logger.setLevel(logging.INFO)
+
+        # Create file handler which logs messages
+        fh = logging.FileHandler(log_file)
+        fh.setLevel(logging.INFO)
+
+        # Create console handler with a higher log level
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.ERROR)
+
+        # Create formatter and add it to the handlers
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh.setFormatter(formatter)
+        ch.setFormatter(formatter)
+
+        # Add the handlers to the logger
+        logger.addHandler(fh)
+        logger.addHandler(ch)
+
+        return logger
+
+    def log_request(self, request, response):
+        self.logger.info(f'{request.method} {request.path} - {response.status_code}')
 
     def route(self, path, methods=["GET"]):
         def wrapper(handler):
@@ -93,6 +121,7 @@ class Application:
         except Exception as exc:
             response = self.handle_exception(exc)
 
+        self.log_request(request, response)  # Log the request details
         request_context.reset(token)  # Reset the context
         return response(environ, start_response)
 
