@@ -1,5 +1,6 @@
 from dust.application import Application, get_request
 from dust.responses import JsonResponse, HtmlResponse, Response
+from dust.helpers import save_uploaded_file, create_response, render_template
 import os
 
 app = Application()
@@ -8,47 +9,71 @@ UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-def save_uploaded_file(file_data, upload_folder):
-    filename = file_data['filename']
-    filepath = os.path.join(upload_folder, filename)
-    with open(filepath, 'wb') as f:
-        f.write(file_data['content'])
-    return filename
-
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET'], summary="Home Route", description="Returns the home page.", responses={200: {"description": "successful operation"}})
 async def home():
-    return app.render_template('example_template.html', title="Home", heading="Welcome to Dust Framework", content="This is the home page.")
+    return render_template(app, 'index.html', title="Home", heading="Welcome to Dust Framework", content="This is the home page.")
 
-@app.route('/hello', methods=['GET'])
+@app.route('/hello', methods=['GET'], summary="Hello Route", description="Returns a hello message.", responses={200: {"description": "successful operation"}})
 async def hello():
     return "Hello, World!"
 
-@app.route('/json', methods=['GET'])
+@app.route('/json', methods=['GET'], summary="JSON Example", description="Returns a JSON response.", responses={200: {"description": "successful operation", "schema": {"type": "object", "properties": {"message": {"type": "string"}}}}})
 async def json_example():
     data = {"message": "This is a JSON response"}
-    return JsonResponse(data)
+    return create_response(data)
 
-@app.route('/data', methods=['POST'])
+@app.route('/login', methods=['POST'], summary="Login", description="Authenticates a user and returns a JWT.", responses={200: {"description": "successful operation", "schema": {"type": "object", "properties": {"token": {"type": "string"}}}}, 401: {"description": "Invalid credentials"}})
+async def login():
+    request = get_request()
+    username = request.form.get('username')
+    password = request.form.get('password')
+    if username == 'user' and password == 'pass':
+        token = app.jwt_handler.encode({'username': username})
+        return create_response({'token': token})
+    return create_response({'message': 'Invalid credentials'}, status=401)
+
+@app.route('/protected', methods=['GET'], summary="Protected Route", description="Requires a valid JWT to access.", responses={200: {"description": "successful operation"}, 401: {"description": "Invalid token"}})
+async def protected():
+    request = get_request()
+    token = request.headers.get('Authorization')
+    if not token:
+        return create_response({'message': 'Token is missing'}, status=401)
+    
+    token = token.split(" ")[1]
+    payload, error = app.jwt_handler.decode(token)
+    if error:
+        return create_response({'message': error}, status=401)
+    
+    return create_response({'message': 'This is a protected route', 'user': payload['username']})
+
+@app.route('/data', methods=['POST'], summary="Post Data", description="Receives data via POST and stores it in session.", responses={200: {"description": "Data received via POST"}})
 async def post_data():
+    request = get_request()
+    request.session['data'] = 'This is session data'
     return "Data received via POST"
 
-@app.route('/update', methods=['PUT'])
+@app.route('/session', methods=['GET'], summary="Session Example", description="Returns session data.", responses={200: {"description": "Returns session data"}})
+async def session_example():
+    request = get_request()
+    session_data = request.session.get('data', 'No session data')
+    return f"Session Data: {session_data}"
+
+@app.route('/update', methods=['PUT'], summary="Update Data", description="Receives data via PUT.", responses={200: {"description": "Data received via PUT"}})
 async def update_data():
     return "Data received via PUT"
 
-@app.route('/delete', methods=['DELETE'])
+@app.route('/delete', methods=['DELETE'], summary="Delete Data", description="Receives data via DELETE.", responses={200: {"description": "Data received via DELETE"}})
 async def delete_data():
     return "Data received via DELETE"
 
-@app.route('/upload', methods=['POST'])
+@app.route('/upload', methods=['POST'], summary="Upload File", description="Uploads a file.", responses={200: {"description": "File uploaded successfully"}}, parameters=[{"name": "file", "in": "formData", "type": "file", "required": True, "description": "The file to upload"}])
 async def upload_file():
     request = get_request()
     if 'file' not in request.form:
         raise ValueError("No file part in the request")
     
     file_data = request.form['file']
-    filename = file_data['filename']
-    filepath = save_uploaded_file(file_data, UPLOAD_FOLDER)
+    filename = save_uploaded_file(file_data, UPLOAD_FOLDER)
 
     return f"File {filename} uploaded successfully"
 

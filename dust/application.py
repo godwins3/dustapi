@@ -8,6 +8,8 @@ from .websockets import WebSocketRouter
 from .responses import Response
 from .sessions import SecureCookieSessionInterface
 from .jwt import JWTHandler
+from .openapi import OpenAPI
+from .swagger_ui import SwaggerUI
 import asyncio
 import websockets
 import threading
@@ -33,6 +35,8 @@ class Application:
         self.secret_key = secret_key
         self.session_interface = SecureCookieSessionInterface(secret_key)
         self.jwt_handler = JWTHandler(jwt_secret_key)
+        self.openapi = OpenAPI(title="Dust Framework API", version="1.0.0", description="API documentation for Dust Framework")
+        self.swagger_ui = SwaggerUI(self)
 
         # Middleware to serve static files
         self.shared_data = SharedDataMiddleware(self.wsgi_app, {
@@ -65,11 +69,14 @@ class Application:
     def log_request(self, request, response):
         self.logger.info(f'{request.method} {request.path} - {response.status_code}')
 
-    def route(self, path, methods=["GET"]):
+    def route(self, path, methods=["GET"], summary=None, description=None, responses=None, parameters=None, request_body=None):
         def wrapper(handler):
             async def wrapped_handler(*args, **kwargs):
                 return await handler()
             self.router.add_route(path, wrapped_handler, methods)
+            if summary and description and responses:
+                for method in methods:
+                    self.openapi.add_path(path, method, summary, description, responses, parameters, request_body)
             return handler
         return wrapper
 
