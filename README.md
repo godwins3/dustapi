@@ -53,15 +53,15 @@ from dust.responses import JsonResponse, HtmlResponse
 app = Application()
 
 @app.route('/')
-def home(request):
+def home():
     return HtmlResponse("<h1>Welcome to Dust Framework!</h1>")
 
 @app.route('/hello')
-def hello(request):
+def hello():
     return "Hello, World!"
 
 @app.route('/json')
-def json_example(request):
+def json_example():
     data = {"message": "This is a JSON response"}
     return JsonResponse(data)
 
