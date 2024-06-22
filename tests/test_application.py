@@ -1,7 +1,7 @@
 # tests/test_application.py
 
 import unittest
-from dust.application import Application
+from dustapi.application import Application
 
 class TestApplication(unittest.TestCase):
     def setUp(self):

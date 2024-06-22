@@ -3,7 +3,7 @@
 import unittest
 import asyncio
 import websockets
-from dust.application import Application
+from dustapi.application import Application
 
 class TestWebSockets(unittest.TestCase):
     def setUp(self):

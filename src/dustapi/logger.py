@@ -1,3 +1,3 @@
 import logging
 
-logger = logging.getLogger("dust_logger")
+logger = logging.getLogger("dustapi_logger")

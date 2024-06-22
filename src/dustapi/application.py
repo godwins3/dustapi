@@ -34,7 +34,7 @@ class Application:
         self.secret_key = secret_key
         self.session_interface = SecureCookieSessionInterface(secret_key)
         self.jwt_handler = JWTHandler(jwt_secret_key)
-        self.openapi = OpenAPI(title="Dust Framework API", version="1.0.0", description="API documentation for Dust Framework")
+        self.openapi = OpenAPI(title="dustapi Framework API", version="1.0.0", description="API documentation for dustapi Framework")
         self.swagger_ui = SwaggerUI(self)
 
         # Middleware to serve static files
@@ -43,7 +43,7 @@ class Application:
         })
 
     def setup_logger(self, log_file):
-        logger = logging.getLogger('dust_logger')
+        logger = logging.getLogger('dustapi_logger')
         logger.setLevel(logging.INFO)
 
         # Create file handler which logs messages

@@ -1,4 +1,4 @@
-# dust/websockets.py
+# dustapi/websockets.py
 
 import asyncio
 from websockets.legacy.server import WebSocketServer

@@ -1,6 +1,6 @@
-from dust.application import Application, get_request
-from dust.responses import JsonResponse, HtmlResponse, Response
-from dust.helpers import save_uploaded_file, create_response, render_template
+from dustapi.application import Application, get_request
+from dustapi.responses import JsonResponse, HtmlResponse, Response
+from dustapi.helpers import save_uploaded_file, create_response, render_template
 import os
 
 app = Application()
@@ -11,7 +11,7 @@ if not os.path.exists(UPLOAD_FOLDER):
 
 @app.route('/', methods=['GET'], summary="Home Route", description="Returns the home page.", responses={200: {"description": "successful operation"}})
 async def home():
-    return render_template(app, 'index.html', title="Home", heading="Welcome to Dust Framework", content="This is the home page.")
+    return render_template(app, 'index.html', title="Home", heading="Welcome to dustapi Framework", content="This is the home page.")
 
 @app.route('/hello', methods=['GET'], summary="Hello Route", description="Returns a hello message.", responses={200: {"description": "successful operation"}})
 async def hello():

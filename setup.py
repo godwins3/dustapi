@@ -16,7 +16,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'dust=dust.cli:cli',
+            'dustapi=dustapi.cli:cli',
         ],
     },
 )

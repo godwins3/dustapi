@@ -1,5 +1,5 @@
 import unittest
-from dust.responses import Response, JsonResponse, HtmlResponse
+from dustapi.responses import Response, JsonResponse, HtmlResponse
 
 class TestResponses(unittest.TestCase):
     def test_response(self):

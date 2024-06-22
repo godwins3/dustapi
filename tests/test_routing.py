@@ -1,7 +1,7 @@
 # tests/test_routing.py
 
 import unittest
-from dust.routing import Router
+from dustapi.routing import Router
 from werkzeug.wrappers import Request
 
 class TestRouter(unittest.TestCase):

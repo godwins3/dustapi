@@ -4,7 +4,7 @@ import os
 
 @click.group()
 def cli():
-    """Dust CLI: A command-line interface for the Dust web framework."""
+    """dustapi CLI: A command-line interface for the dustapi web framework."""
     pass
 
 @cli.command()
@@ -14,22 +14,22 @@ def cli():
 @click.option('--static-folder', default='static', help='Folder to serve static files from.')
 @click.option('--log-file', default='app.log', help='File to log requests.')
 def runserver(host, port, template_folder, static_folder, log_file):
-    """Run the Dust development server."""
+    """Run the dustapi development server."""
     app = Application(template_folder=template_folder, static_folder=static_folder, log_file=log_file)
     click.echo(f"Running server on {host}:{port} with templates from '{template_folder}', static files from '{static_folder}', and logging to '{log_file}'")
     app.run(host=host, port=port)
 
 @cli.command()
 def createproject():
-    """Create a new Dust project structure."""
+    """Create a new dustapi project structure."""
     project_name = click.prompt('Enter the project name')
     os.makedirs(project_name)
     os.makedirs(os.path.join(project_name, 'templates'))
     os.makedirs(os.path.join(project_name, 'static'))
     os.makedirs(os.path.join(project_name, 'uploads'))
     with open(os.path.join(project_name, 'app.py'), 'w') as f:
-        f.write("""from dust.application import Application, get_request
-from dust.responses import JsonResponse, HtmlResponse, Response
+        f.write("""from dustapi.application import Application, get_request
+from dustapi.responses import JsonResponse, HtmlResponse, Response
 import os
 
 app = Application()
@@ -47,7 +47,7 @@ def save_uploaded_file(file_data, upload_folder):
 
 @app.route('/', methods=['GET'])
 async def home():
-    return app.render_template('example_template.html', title="Home", heading="Welcome to Dust Framework", content="This is the home page.")
+    return app.render_template('example_template.html', title="Home", heading="Welcome to dustapi Framework", content="This is the home page.")
 
 @app.route('/hello', methods=['GET'])
 async def hello():

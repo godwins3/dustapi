@@ -1,26 +1,26 @@
-# Contributing to Dust
+# Contributing to dustapi
 
-First of all, thank you for your interest in contributing to Dust! We appreciate any help you can provide in making this framework better.
+First of all, thank you for your interest in contributing to dustapi! We appreciate any help you can provide in making this framework better.
 
 ## How to Contribute
 
 ### Reporting Bugs
 
-If you find a bug in the framework, please report it by creating an issue on the [GitHub Issues](https://github.com/godwins3/dust/issues) page. Please include as much detail as possible to help us understand and reproduce the issue.
+If you find a bug in the framework, please report it by creating an issue on the [GitHub Issues](https://github.com/godwins3/dustapi/issues) page. Please include as much detail as possible to help us understand and reproduce the issue.
 
 ### Feature Requests
 
-If you have a feature request or an idea for improving Dust, please open an issue on the [GitHub Issues](https://github.com/dust/dust/issues) page and label it as a "Feature Request". 
+If you have a feature request or an idea for improving dustapi, please open an issue on the [GitHub Issues](https://github.com/dustapi/dustapi/issues) page and label it as a "Feature Request". 
 
 ### Code Contributions
 
 1. **Fork the Repository:**
 
-    Fork the Dust repository to your own GitHub account and then clone it to your local machine to start working on the changes.
+    Fork the dustapi repository to your own GitHub account and then clone it to your local machine to start working on the changes.
 
     ```bash
-    git clone https://github.com/godwins3/dust.git
-    cd dust
+    git clone https://github.com/godwins3/dustapi.git
+    cd dustapi
     ```
 
 2. **Create a New Branch:**
@@ -76,7 +76,7 @@ If you have a feature request or an idea for improving Dust, please open an issu
 
 9. **Open a Pull Request:**
 
-    Go to the original Dust repository and open a pull request. Provide a clear description of your changes and why they are necessary.
+    Go to the original dustapi repository and open a pull request. Provide a clear description of your changes and why they are necessary.
 
 ## Coding Standards
 
@@ -86,7 +86,7 @@ If you have a feature request or an idea for improving Dust, please open an issu
 
 ## License
 
-By contributing to Dust, you agree that your contributions will be licensed under the MIT License.
+By contributing to dustapi, you agree that your contributions will be licensed under the MIT License.
 
 ## Code of Conduct
 

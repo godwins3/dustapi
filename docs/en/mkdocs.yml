@@ -1,7 +1,7 @@
 INHERIT: ../en/mkdocs.maybe-insiders.yml
-site_name: Dust
-site_description: Dust framework, high performance, easy to learn, fast to code, ready for production
-site_url: https://dust.aoristlabs.co/
+site_name: dustapi
+site_description: dustapi framework, high performance, easy to learn, fast to code, ready for production
+site_url: https://dustapi.aoristlabs.co/
 theme:
   name: material
   custom_dir: ../en/overrides
@@ -36,8 +36,8 @@ theme:
   logo: img/icon-white.svg
   favicon: img/favicon.png
   language: en
-repo_name: godwins3/dust
-repo_url: https://github.com/godwins3/dust
+repo_name: godwins3/dustapi
+repo_url: https://github.com/godwins3/dustapi
 edit_uri: ''
 plugins:
   search: null
@@ -81,7 +81,7 @@ plugins:
           show_symbol_type_heading: true
           show_symbol_type_toc: true
 nav:
-- Dust: index.md
+- dustapi: index.md
 - features.md
 - Learn:
   - learn/index.md
@@ -257,7 +257,7 @@ extra:
     property: G-YNEVN69SC3
   social:
   - icon: fontawesome/brands/github-alt
-    link: https://github.com/godwins3/dust
+    link: https://github.com/godwins3/dustapi
   - icon: fontawesome/brands/discord
     link: https://discord.gg/VQjSZaeJmf
   - icon: fontawesome/brands/twitter

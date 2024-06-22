@@ -1,16 +1,16 @@
 # Security Policy
 
-Security is very important for Dust and its community. 🔒
+Security is very important for dustapi and its community. 🔒
 
 Learn more about it below. 👇
 
 ## Versions
 
-The latest version of Dust is supported.
+The latest version of dustapi is supported.
 
-You are encouraged to [write tests](https://dust.aoristlabs.co/tutorial/testing/) for your application and update your Dust version frequently after ensuring that your tests are passing. This way you will benefit from the latest features, bug fixes, and **security fixes**.
+You are encouraged to [write tests](https://dustapi.aoristlabs.co/tutorial/testing/) for your application and update your dustapi version frequently after ensuring that your tests are passing. This way you will benefit from the latest features, bug fixes, and **security fixes**.
 
-You can learn more about [Dust versions and how to pin and upgrade them](https://dust.aoristlabs.co/deployment/versions/) for your project in the docs.
+You can learn more about [dustapi versions and how to pin and upgrade them](https://dustapi.aoristlabs.co/deployment/versions/) for your project in the docs.
 
 ## Reporting a Vulnerability
 
@@ -28,4 +28,4 @@ It's better to discuss privately and try to find a solution first, to limit the 
 
 Thanks for your help!
 
-The Dust community and I thank you for that. 🙇
+The dustapi community and I thank you for that. 🙇
