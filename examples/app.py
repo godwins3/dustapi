@@ -13,12 +13,11 @@ def save_uploaded_file(file_data, upload_folder):
     filepath = os.path.join(upload_folder, filename)
     with open(filepath, 'wb') as f:
         f.write(file_data['content'])
-
     return filename
 
 @app.route('/', methods=['GET'])
 def home(request):
-    return HtmlResponse("<h1>Welcome to Dust Framework!</h1>")
+    return app.render_template('example_template.html', title="Home", heading="Welcome to Dust Framework", content="This is the home page.")
 
 @app.route('/hello', methods=['GET'])
 def hello(request):

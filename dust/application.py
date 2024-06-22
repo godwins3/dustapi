@@ -1,5 +1,6 @@
 from werkzeug.wrappers import Request, Response
 from werkzeug.serving import run_simple
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from .routing import Router
 from .websockets import WebSocketRouter
 import asyncio
@@ -8,9 +9,13 @@ import threading
 import os
 
 class Application:
-    def __init__(self):
+    def __init__(self, template_folder='templates'):
         self.router = Router()
         self.ws_router = WebSocketRouter()
+        self.template_env = Environment(
+            loader=FileSystemLoader(template_folder),
+            autoescape=select_autoescape(['html', 'xml'])
+        )
 
     def route(self, path, methods=["GET"]):
         def wrapper(handler):
@@ -23,6 +28,10 @@ class Application:
             self.ws_router.add_route(path, handler)
             return handler
         return wrapper
+
+    def render_template(self, template_name, **context):
+        template = self.template_env.get_template(template_name)
+        return template.render(context)
 
     def parse_form_data(self, environ):
         form = {}

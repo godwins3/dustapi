@@ -1,7 +1,7 @@
 # tests/test_application.py
 
 import unittest
-from my_web_framework.application import Application
+from dust.application import Application
 
 class TestApplication(unittest.TestCase):
     def setUp(self):
