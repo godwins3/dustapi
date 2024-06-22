@@ -8,7 +8,7 @@ version = "0.0.1"
 authors = [
     { name="Praise G", email="praisegodwins4@gmail.com" },
 ]
-description = "A small example package"
+description = "A simple fast web framework"
 readme = "README.md"
 requires-python = ">=3.8"
 classifiers = [
@@ -18,5 +18,5 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/godwins3/dust"
-Issues = "https://github.com/godwins3/dust/issues/"
+Homepage = "https://github.com/godwins3/dustapi"
+Issues = "https://github.com/godwins3/dustapi/issues/"
