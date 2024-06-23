@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='dustapi',
-    version='0.0.1',
+    version='0.0.3',
     packages=find_packages(),
     description='Fast light weight web server',
     author='Praise Godwins',
