@@ -1,17 +1,15 @@
-from werkzeug.wrappers import Response
-
+from werkzeug.wrappers import Response as WerkzeugResponse
+    
 class Router:
     def __init__(self):
-        self.routes = {}
+        self.routes = []
 
     def add_route(self, path, handler, methods):
-        self.routes[path] = (handler, methods)
+        self.routes.append((path, handler, methods))
 
-    def dispatch(self, request):
-        handler, methods = self.routes.get(request.path, (None, None))
-        if handler and request.method in methods:
-            response = handler(request)
-            if isinstance(response, Response):
-                return response
-            return Response(response)
-        return Response("Not Found", status=404)
+    async def dispatch(self, request):
+        for path, handler, methods in self.routes:
+            if request.path == path and request.method in methods:
+                return await handler(request)
+        return WerkzeugResponse("Not Found", status=404)
+

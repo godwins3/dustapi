@@ -1,4 +1,5 @@
 from werkzeug.wrappers import Request #, Response
+from werkzeug.wrappers import Response as WerkzeugResponse
 from werkzeug.serving import run_simple
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -131,38 +132,36 @@ class Application:
             return func
         return decorator
 
-    def wsgi_app(self, environ, start_response):
+    async def async_wsgi_app(self, environ, start_response):
         request = Request(environ)
         request.form = self.parse_form_data(environ)
         
-        # Retrieve session if session interface is configured
         if self.session_interface:
             session_id = request.cookies.get('session_id')
-            request.session = self.session_interface.get_session(session_id)
+            request.session = self.session_interface.get_session(session_id) if session_id else None
         else:
             request.session = None
         
         token = request_context.set(request)  # Set the request context
 
         try:
-            response = self.router.dispatch(request)
-            
-            # Ensure response is a Response object
-            if not isinstance(response, Response):
-                response = Response(response)
+            response = await self.router.dispatch(request)
+            if not isinstance(response, WerkzeugResponse):
+                response = WerkzeugResponse(response)
         except Exception as exc:
             response = self.handle_exception(exc)
 
         self.log_request(request, response)  # Log the request details
         
-        # Save session state if session interface is configured
         if self.session_interface:
+            session_id = request.cookies.get('session_id')
             self.session_interface.save_session(session_id, request.session)
         
         request_context.reset(token)  # Reset the context
-        
-        # Ensure response is returned as an iterable
         return response(environ, start_response)
+
+    def wsgi_app(self, environ, start_response):
+        return asyncio.run(self.async_wsgi_app(environ, start_response))
 
     def __call__(self, environ, start_response):
         return self.shared_data(environ, start_response)
@@ -172,10 +171,33 @@ class Application:
             run_simple(host, port, self)
 
         def run_ws():
-            asyncio.run(websockets.serve(self.ws_router.handler, host, port + 1))
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(websockets.serve(self.ws_router.handler, host, port + 1))
+            loop.run_forever()
 
-        threading.Thread(target=run_http).start()
-        threading.Thread(target=run_ws).start()
+        # Start HTTP server in a separate thread
+        http_thread = threading.Thread(target=run_http)
+        http_thread.start()
 
+        # Start WebSocket server in a separate thread
+        ws_thread = threading.Thread(target=run_ws)
+        ws_thread.start()
+
+        # Setup signal handler for Ctrl+C (SIGINT)
+        signal.signal(signal.SIGINT, self.stop_server)
+
+        # Wait for both threads to complete
+        http_thread.join()
+        ws_thread.join()
+
+    def stop_server(self, signum, frame):
+        print("Stopping servers...")
+
+        # Perform cleanup tasks here if needed
+
+        # Exit the application gracefully
+        sys.exit(0)
+        
 def get_request():
     return request_context.get()
