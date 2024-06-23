@@ -15,15 +15,10 @@ dustapi is a lightweight web framework written in Python, designed to be simple 
 
 ## Installation
 
-To install dustapi, you can simply clone the repository and install the necessary dependencies:
+To install dustapi, you can simply use pip:
 
 ```bash
-git clone https://github.com/godwins3/dustapi.git
-cd dustapi
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-
+pip install dustapi
 ```
 
 ## Usage
