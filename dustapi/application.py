@@ -1,26 +1,29 @@
-from werkzeug.wrappers import Request, Response
+from werkzeug.wrappers import Request #, Response
 from werkzeug.serving import run_simple
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from .routing import Router
 from .web_sockets import WebSocketRouter
 from .responses import Response
-from .sessions import SecureCookieSessionInterface
 from .jwt import JWTHandler
 from .openapi import OpenAPI
 from .swagger_ui import SwaggerUI
+from .sessions import SessionManager
 import asyncio
 import websockets
 import threading
 import os
 import contextvars
 import logging
+import signal
+import sys
+
 
 # Create a context variable to store the request
 request_context = contextvars.ContextVar('request')
 
 class Application:
-    def __init__(self, template_folder='templates', static_folder='static', static_url_path='/static', log_file='app.log', secret_key='supersecretkey', jwt_secret_key='jwtsecretkey'):
+    def __init__(self, template_folder='templates', static_folder='static', static_url_path='/static', log_file='app.log', secret_key='supersecretkey', jwt_secret_key='jwtsecretkey', enable_sessions=False):
         self.router = Router()
         self.ws_router = WebSocketRouter()
         self.template_env = Environment(
@@ -32,15 +35,22 @@ class Application:
         self.error_handlers = {}
         self.logger = self.setup_logger(log_file)
         self.secret_key = secret_key
-        self.session_interface = SecureCookieSessionInterface(secret_key)
+        self.session_interface = SessionManager(secret_key) if enable_sessions else None
         self.jwt_handler = JWTHandler(jwt_secret_key)
         self.openapi = OpenAPI(title="dustapi Framework API", version="1.0.0", description="API documentation for dustapi Framework")
-        self.swagger_ui = SwaggerUI(self)
+        # self.swagger_ui = SwaggerUI(self)
 
         # Middleware to serve static files
         self.shared_data = SharedDataMiddleware(self.wsgi_app, {
             static_url_path: os.path.join(os.getcwd(), static_folder)
         })
+
+        # stop dust server
+        signal.signal(signal.SIGINT, self.handle_stop_server)
+
+    def handle_stop_server(self, signum, frame):
+        print("Stopping server gracefully...")
+        sys.exit(0)
 
     def setup_logger(self, log_file):
         logger = logging.getLogger('dustapi_logger')
@@ -124,19 +134,34 @@ class Application:
     def wsgi_app(self, environ, start_response):
         request = Request(environ)
         request.form = self.parse_form_data(environ)
-        request.session = self.session_interface.open_session(request)
+        
+        # Retrieve session if session interface is configured
+        if self.session_interface:
+            session_id = request.cookies.get('session_id')
+            request.session = self.session_interface.get_session(session_id)
+        else:
+            request.session = None
+        
         token = request_context.set(request)  # Set the request context
 
         try:
             response = self.router.dispatch(request)
+            
+            # Ensure response is a Response object
             if not isinstance(response, Response):
                 response = Response(response)
         except Exception as exc:
             response = self.handle_exception(exc)
 
         self.log_request(request, response)  # Log the request details
-        self.session_interface.save_session(request, response, request.session)
+        
+        # Save session state if session interface is configured
+        if self.session_interface:
+            self.session_interface.save_session(session_id, request.session)
+        
         request_context.reset(token)  # Reset the context
+        
+        # Ensure response is returned as an iterable
         return response(environ, start_response)
 
     def __call__(self, environ, start_response):

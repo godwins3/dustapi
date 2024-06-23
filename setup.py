@@ -13,6 +13,7 @@ setup(
         'websockets',
         'mkdocs',
         'pyjwt',
+        'typer',
     ],
     entry_points={
         'console_scripts': [
