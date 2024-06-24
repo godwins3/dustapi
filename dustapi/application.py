@@ -36,7 +36,7 @@ class Application:
         self.secret_key = secret_key or Fernet.generate_key().decode()
         self.session_interface = SessionManager(self.secret_key)
         self.jwt_handler = JWTHandler(jwt_secret_key)
-        self.openapi = OpenAPI(title="dustapi Framework API", version="1.0.0", description="API documentation for dustapi Framework")
+        self.openapi = OpenAPI(title="dustapi Framework API", version="0.0.5", description="API documentation for dustapi Framework")
         
         # Middleware to serve static files
         self.shared_data = SharedDataMiddleware(self.wsgi_app, {
