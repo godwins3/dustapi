@@ -27,6 +27,19 @@ def createproject():
     os.makedirs(os.path.join(project_name, 'templates'))
     os.makedirs(os.path.join(project_name, 'static'))
     os.makedirs(os.path.join(project_name, 'uploads'))
+    with open(os.path.join(project_name, 'templates/index.html'), 'w') as f:
+        f.write("""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+</head>
+<body>
+    <h1>{{ heading }}</h1>
+    <p>{{ content }}</p>
+</body>
+</html>
+""")
     with open(os.path.join(project_name, 'app.py'), 'w') as f:
         f.write("""from dustapi.application import Application, get_request
 from dustapi.responses import JsonResponse, HtmlResponse, Response
@@ -47,7 +60,7 @@ def save_uploaded_file(file_data, upload_folder):
 
 @app.route('/', methods=['GET'])
 async def home():
-    return app.render_template('example_template.html', title="Home", heading="Welcome to dustapi Framework", content="This is the home page.")
+    return app.render_template('index.html', title="Home", heading="Welcome to dustapi Framework", content="This is the home page.")
 
 @app.route('/hello', methods=['GET'])
 async def hello():
