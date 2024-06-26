@@ -1,4 +1,4 @@
-# dustapi - A Simple Python Web Framework
+# dustapi - A Fast light weight Python Web Framework
 
 dustapi is a lightweight web framework written in Python, designed to be simple and easy to use. It provides basic routing and response handling, making it a great starting point for learning about web frameworks or building small web applications.
 
@@ -8,10 +8,16 @@ dustapi is a lightweight web framework written in Python, designed to be simple 
 - Support for all HTTP methods (GET, POST, PUT, DELETE, etc.)
 - WebSocket support
 - Custom response types (JSON, HTML, etc.)
-- Middleware support (planned)
 - Extensible and lightweight
 - Auto generate docs with swagger
 - Support for jwt and session manager
+
+## Pending features
+
+Feel free to help by contributing on these features to make dustapi a success.
+
+- AI/ML model inference and consumption
+- Middleware support (planned)
 
 ## Installation
 
