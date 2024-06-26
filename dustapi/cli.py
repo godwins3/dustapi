@@ -4,7 +4,7 @@ import os
 
 @click.group()
 def cli():
-    """dustapi CLI: A command-line interface for the dustapi web framework."""
+    """DustAPI CLI: A command-line interface for the DustAPI web framework."""
     pass
 
 @cli.command()
@@ -21,7 +21,7 @@ def runserver(host, port, template_folder, static_folder, log_file):
 
 @cli.command()
 def createproject():
-    """Create a new dustapi project structure."""
+    """Create a new DustAPI project structure."""
     project_name = click.prompt('Enter the project name')
     os.makedirs(project_name)
     os.makedirs(os.path.join(project_name, 'templates'))

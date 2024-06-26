@@ -1,6 +1,6 @@
-# dustapi - A Fast light weight Python Web Framework
+# DustAPI - A Fast light weight Python Web Framework
 
-dustapi is a lightweight web framework written in Python, designed to be simple and easy to use. It provides basic routing and response handling, making it a great starting point for learning about web frameworks or building small web applications.
+DustAPI is a lightweight web framework written in Python, designed to be simple and easy to use. It provides basic routing and response handling, making it a great starting point for learning about web frameworks or building small web applications.
 
 ## Features
 
@@ -21,7 +21,7 @@ Feel free to help by contributing on these features to make dustapi a success.
 
 ## Installation
 
-To install dustapi, you can simply use pip:
+To install DustAPI, you can simply use pip:
 
 ```bash
 pip install dustapi
