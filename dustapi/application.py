@@ -21,7 +21,7 @@ import websockets
 # Create a context variable to store the request
 request_context = contextvars.ContextVar('request')
 
-class Application:
+class Dust:
     def __init__(self, template_folder='templates', static_folder='static', static_url_path='/static', log_file='app.log', secret_key=None, jwt_secret_key='jwtsecretkey'):
         self.router = Router()
         self.ws_router = WebSocketRouter()

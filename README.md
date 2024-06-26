@@ -46,11 +46,11 @@ dustapi runserver --host 0.0.0.0 --port 8000 --template-folder mytemplates --sta
 ### Example
 
 ```bash
-from dustapi.application import Application, get_request
+from dustapi.application import Dust, get_request
 from dustapi.responses import JsonResponse, HtmlResponse, Response
 import os
 
-app = Application()
+app = Dust()
 
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):

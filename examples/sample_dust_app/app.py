@@ -1,9 +1,9 @@
-from dustapi.application import Application, get_request
+from dustapi.application import Dust, get_request
 from dustapi.responses import JsonResponse, HtmlResponse, Response
 from dustapi.helpers import save_uploaded_file, create_response, render_template
 import os
 
-app = Application()
+app = Dust()
 
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):

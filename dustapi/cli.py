@@ -1,5 +1,5 @@
 import click
-from dustapi.application import Application
+from dustapi.application import Dust
 import os
 
 @click.group()
@@ -15,7 +15,7 @@ def cli():
 @click.option('--log-file', default='app.log', help='File to log requests.')
 def runserver(host, port, template_folder, static_folder, log_file):
     """Run the dustapi development server."""
-    app = Application(template_folder=template_folder, static_folder=static_folder, log_file=log_file)
+    app = Dust(template_folder=template_folder, static_folder=static_folder, log_file=log_file)
     click.echo(f"Running server on {host}:{port} with templates from '{template_folder}', static files from '{static_folder}', and logging to '{log_file}'")
     app.run(host=host, port=port)
 
@@ -41,11 +41,11 @@ def createproject():
 </html>
 """)
     with open(os.path.join(project_name, 'app.py'), 'w') as f:
-        f.write("""from dustapi.application import Application, get_request
+        f.write("""from dustapi.application import Dust, get_request
 from dustapi.responses import JsonResponse, HtmlResponse, Response
 import os
 
-app = Application()
+app = Dust()
 
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):

@@ -3,11 +3,11 @@
 import unittest
 import asyncio
 import websockets
-from dustapi.application import Application
+from dustapi.application import Dust
 
 class TestWebSockets(unittest.TestCase):
     def setUp(self):
-        self.app = Application()
+        self.app = Dust()
 
     def test_echo_websocket(self):
         @self.app.websocket('/ws')

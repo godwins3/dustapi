@@ -1,10 +1,10 @@
 # examples/app.py
 
-from dustapi.application import Application, Response
+from dustapi.application import Dust, Response
 from dustapi.sessions import SessionManager
 
 # Initialize your Dust application with a session interface
-app = Application(secret_key=SessionManager(secret_key='super_secret_key'))
+app = Dust(secret_key=SessionManager(secret_key='super_secret_key'))
 
 # Define routes using the `route` decorator
 @app.route('/')
