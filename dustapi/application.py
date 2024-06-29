@@ -173,9 +173,11 @@ class Dust:
         self.stop_event.set()
         if self.http_task:
             self.http_task.join()
+            self.logger.info('HTTP task joined successfully')
         if self.ws_task:
             self.ws_task.cancel()
-        print("Server stopped.")
+            self.logger.info('WS task canceled successfully')
+        self.logger.info('Dust server gracefully stopped')
 
     def run(self, host='localhost', port=5000):
         def run_http():
@@ -187,6 +189,7 @@ class Dust:
         try:
             self.ws_task = asyncio.run(self.run_ws(host, port))
         except KeyboardInterrupt:
+            self.logger.info("KeyboardInterrupt: Stopping the server...")
             print("KeyboardInterrupt: Stopping the server...")
             self.stop()
             return
@@ -210,11 +213,12 @@ class Dust:
     async def run_ws(self, host, port):
         try:
             async with websockets.serve(self.ws_router.handler, host, port + 1):
+                self.logger.info(F"Websocket server running on {host}:{port + 1}")
                 await self.stop_event.wait()
         except asyncio.CancelledError:
-            print("WebSocket server task canceled.")
+            self.logger.exception("WebSocket server task canceled.")
         except Exception as e:
-            print(f"WebSocket server exception: {e}")
+            self.logger.exception(f"WebSocket server exception: {e}")
 
 def get_request():
     return request_context.get()
