@@ -4,27 +4,24 @@ import threading
 import os
 import contextvars
 import logging
+from wsgiref.simple_server import make_server, WSGIRequestHandler, WSGIServer
 from werkzeug.wrappers import Request, Response as WerkzeugResponse
-from werkzeug.serving import run_simple
 from werkzeug.middleware.shared_data import SharedDataMiddleware
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from cryptography.fernet import Fernet
 from .routing import Router
-from .web_sockets import WebSocketRouter
 from .responses import Response
 from .sessions import SessionManager
 from .jwt import JWTHandler
 from .openapi import OpenAPI
 from .swagger_ui import SwaggerUI
-import websockets
 
 # Create a context variable to store the request
 request_context = contextvars.ContextVar('request')
 
 class Dust:
-    def __init__(self, template_folder='templates', static_folder='static', static_url_path='/static', log_file='app.log', secret_key=None, jwt_secret_key='jwtsecretkey'):
+    def __init__(self, template_folder='templates', static_folder='static', static_url_path='/static', log_file='app.log', secret_key=None, jwt_secret_key=None):
         self.router = Router()
-        self.ws_router = WebSocketRouter()
         self.template_env = Environment(
             loader=FileSystemLoader(template_folder),
             autoescape=select_autoescape(['html', 'xml'])
@@ -46,8 +43,7 @@ class Dust:
         # Initialize SwaggerUI after shared_data is set up
         self.swagger_ui = SwaggerUI(self)
         
-        self.http_task = None
-        self.ws_task = None
+        self.http_thread = None
         self.stop_event = threading.Event()
 
     def setup_logger(self, log_file):
@@ -84,12 +80,6 @@ class Dust:
             if summary and description and responses:
                 for method in methods:
                     self.openapi.add_path(path, method, summary, description, responses, parameters, request_body)
-            return handler
-        return wrapper
-
-    def websocket(self, path):
-        def wrapper(handler):
-            self.ws_router.add_route(path, handler)
             return handler
         return wrapper
     
@@ -131,9 +121,6 @@ class Dust:
             return func
         return decorator
 
-    def wsgi_app(self, environ, start_response):
-        return asyncio.run(self.async_wsgi_app(environ, start_response))
-
     async def async_wsgi_app(self, environ, start_response):
         request = Request(environ)
         request.form = self.parse_form_data(environ)
@@ -166,33 +153,31 @@ class Dust:
         request_context.reset(token)  # Reset the context
         return response(environ, start_response)
 
+    def wsgi_app(self, environ, start_response):
+        return asyncio.run(self.async_wsgi_app(environ, start_response))
+
     def __call__(self, environ, start_response):
         return self.shared_data(environ, start_response)
 
     def stop(self):
         self.stop_event.set()
-        if self.http_task:
-            self.http_task.join()
+        if self.http_thread:
+            self.http_thread.join()
             self.logger.info('HTTP task joined successfully')
-        if self.ws_task:
-            self.ws_task.cancel()
-            self.logger.info('WS task canceled successfully')
         self.logger.info('Dust server gracefully stopped')
 
     def run(self, host='localhost', port=5000):
+        def serve_forever(httpd):
+            while not self.stop_event.is_set():
+                httpd.handle_request()
+
         def run_http():
-            run_simple(host, port, self)
+            with make_server(host, port, self) as httpd:
+                self.logger.info(f"Serving on {host}:{port}")
+                serve_forever(httpd)
 
-        self.http_task = threading.Thread(target=run_http)
-        self.http_task.start()
-
-        try:
-            self.ws_task = asyncio.run(self.run_ws(host, port))
-        except KeyboardInterrupt:
-            self.logger.info("KeyboardInterrupt: Stopping the server...")
-            print("KeyboardInterrupt: Stopping the server...")
-            self.stop()
-            return
+        self.http_thread = threading.Thread(target=run_http)
+        self.http_thread.start()
 
         def handle_sigint(signum, frame):
             self.stop()
@@ -209,16 +194,6 @@ class Dust:
                 self.stop()
 
         threading.Thread(target=listen_for_q).start()
-
-    async def run_ws(self, host, port):
-        try:
-            async with websockets.serve(self.ws_router.handler, host, port + 1):
-                self.logger.info(F"Websocket server running on {host}:{port + 1}")
-                await self.stop_event.wait()
-        except asyncio.CancelledError:
-            self.logger.exception("WebSocket server task canceled.")
-        except Exception as e:
-            self.logger.exception(f"WebSocket server exception: {e}")
 
 def get_request():
     return request_context.get()
