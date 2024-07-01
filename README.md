@@ -100,11 +100,6 @@ async def upload_file():
 
     return f"File {filename} uploaded successfully"
 
-@app.websocket('/ws')
-async def echo(websocket, path):
-    async for message in websocket:
-        await websocket.send(f"Echo: {message}")
-
 # Custom error handler for ValueError
 @app.errorhandler(ValueError)
 def handle_value_error(exc):
