@@ -1,6 +1,8 @@
 import click
 from dustapi.application import Dust
 import os
+import importlib
+import sys
 
 @click.group()
 def cli():
@@ -15,7 +17,21 @@ def cli():
 @click.option('--log-file', default='app.log', help='File to log requests.')
 def runserver(host, port, template_folder, static_folder, log_file):
     """Run the dustapi development server."""
-    app = Dust(template_folder=template_folder, static_folder=static_folder, log_file=log_file)
+    app_module_path = os.path.join(os.getcwd(), 'app.py')
+    
+    if not os.path.exists(app_module_path):
+        click.echo("Error: app.py not found in the current working directory.")
+        sys.exit(1)
+    
+    spec = importlib.util.spec_from_file_location("app", app_module_path)
+    app_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(app_module)
+    
+    if not hasattr(app_module, 'Dust'):
+        click.echo("Error: 'Dust' class not found in app.py.")
+        sys.exit(1)
+    
+    app = app_module.Dust(template_folder=template_folder, static_folder=static_folder, log_file=log_file)
     click.echo(f"Running server on {host}:{port} with templates from '{template_folder}', static files from '{static_folder}', and logging to '{log_file}'")
     app.run(host=host, port=port)
 
