@@ -5,6 +5,7 @@ DustAPI is a lightweight web framework written in Python, designed to be simple 
 ## Features
 
 - Simple and intuitive routing
+- Fully homomorphic encryption (i.e  dust server interacts with encrypted data without ever decrypting it)
 - Support for all HTTP methods (GET, POST, PUT, DELETE, etc.)
 - WebSocket support
 - Custom response types (JSON, HTML, etc.)
