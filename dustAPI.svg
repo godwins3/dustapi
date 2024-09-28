@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <style>
+    text { font-family: Arial, sans-serif; fill: #333; }
+    .title { font-size: 24px; font-weight: bold; }
+    .label { font-size: 14px; }
+    .small-text { font-size: 12px; }
+  </style>
+  
+  <!-- Background -->
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  
+  <!-- Server -->
+  <circle cx="200" cy="200" r="80" fill="#ffd700"/>
+  <text x="200" y="200" text-anchor="middle" class="title">SERVER</text>
+  <text x="200" y="230" text-anchor="middle" class="small-text">- computation over FHE</text>
+  <text x="200" y="250" text-anchor="middle" class="small-text">- store Enc(data)</text>
+  
+  <!-- Client -->
+  <circle cx="600" cy="200" r="80" fill="#ffd700"/>
+  <text x="600" y="200" text-anchor="middle" class="title">CLIENT</text>
+  <text x="600" y="230" text-anchor="middle" class="small-text">decrypt(IE|results)</text>
+  
+  <!-- Arrows -->
+  <path d="M280 180 H520" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  <path d="M520 220 H280" stroke="#333" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+  
+  <!-- Arrowhead marker -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+  </defs>
+  
+  <!-- Labels -->
+  <text x="400" y="170" text-anchor="middle" class="label">dustAPI(IE|results)</text>
+  <text x="400" y="250" text-anchor="middle" class="label">dustAPI(ek)</text>
+  
+  <!-- sk label -->
+  <text x="600" y="300" text-anchor="middle" class="label">sk</text>
+</svg>
