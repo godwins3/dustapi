@@ -1,7 +1,7 @@
 import click
 from dustapi.application import Dust
 import os
-import importlib
+import importlib.util
 import sys
 
 @click.group()
@@ -10,8 +10,8 @@ def cli():
     pass
 
 @cli.command()
-@click.option('--host', default='localhost', help='Host to run the server on.')
-@click.option('--port', default=5000, help='Port to run the server on.')
+@click.option('--host', default='127.0.0.1', help='Host to run the server on.')
+@click.option('--port', default=5000, type=int, help='Port to run the server on.')
 @click.option('--template-folder', default='templates', help='Folder to look for templates.')
 @click.option('--static-folder', default='static', help='Folder to serve static files from.')
 @click.option('--log-file', default='app.log', help='File to log requests.')
@@ -20,31 +20,41 @@ def runserver(host, port, template_folder, static_folder, log_file):
     app_module_path = os.path.join(os.getcwd(), 'app.py')
     
     if not os.path.exists(app_module_path):
-        click.echo("Error: app.py not found in the current working directory.")
+        click.echo("Error: app.py not found in the current working directory.", err=True)
         sys.exit(1)
     
-    spec = importlib.util.spec_from_file_location("app", app_module_path)
-    app_module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(app_module)
-    
-    if not hasattr(app_module, 'Dust'):
-        click.echo("Error: 'Dust' class not found in app.py.")
+    try:
+        spec = importlib.util.spec_from_file_location("app", app_module_path)
+        app_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(app_module)
+    except Exception as e:
+        click.echo(f"Error loading app.py: {str(e)}", err=True)
         sys.exit(1)
     
-    app = app_module.Dust(template_folder=template_folder, static_folder=static_folder, log_file=log_file)
+    if not hasattr(app_module, 'app') or not isinstance(app_module.app, Dust):
+        click.echo("Error: 'app' instance of Dust class not found in app.py.", err=True)
+        sys.exit(1)
+    
+    app = app_module.app
+    app.template_folder = template_folder
+    app.static_folder = static_folder
+    app.log_file = log_file
+    
     click.echo(f"Running server on {host}:{port} with templates from '{template_folder}', static files from '{static_folder}', and logging to '{log_file}'")
     app.run(host=host, port=port)
 
 @cli.command()
-def createproject():
+@click.argument('project_name')
+def createproject(project_name):
     """Create a new DustAPI project structure."""
-    project_name = click.prompt('Enter the project name')
-    os.makedirs(project_name)
-    os.makedirs(os.path.join(project_name, 'templates'))
-    os.makedirs(os.path.join(project_name, 'static'))
-    os.makedirs(os.path.join(project_name, 'uploads'))
-    with open(os.path.join(project_name, 'templates/index.html'), 'w') as f:
-        f.write("""<!DOCTYPE html>
+    try:
+        os.makedirs(project_name)
+        os.makedirs(os.path.join(project_name, 'templates'))
+        os.makedirs(os.path.join(project_name, 'static'))
+        os.makedirs(os.path.join(project_name, 'uploads'))
+        
+        with open(os.path.join(project_name, 'templates', 'index.html'), 'w') as f:
+            f.write("""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -56,8 +66,8 @@ def createproject():
 </body>
 </html>
 """)
-    with open(os.path.join(project_name, 'app.py'), 'w') as f:
-        f.write("""from dustapi.application import Dust, get_request
+        with open(os.path.join(project_name, 'app.py'), 'w') as f:
+            f.write("""from dustapi.application import Dust, get_request
 from dustapi.responses import JsonResponse, HtmlResponse, Response
 import os
 
@@ -116,20 +126,21 @@ async def echo(websocket, path):
     async for message in websocket:
         await websocket.send(f"Echo: {message}")
 
-# Custom error handler for ValueError
 @app.errorhandler(ValueError)
 def handle_value_error(exc):
     return Response(str(exc), status=400)
 
-# Custom error handler for generic exceptions
 @app.errorhandler(Exception)
 def handle_generic_exception(exc):
     return Response("An unexpected error occurred.", status=500)
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=5000)
+    app.run(host='127.0.0.1', port=5000)
 """)
-    click.echo(f"Project {project_name} created successfully.")
+        click.echo(f"Project {project_name} created successfully.")
+    except OSError as e:
+        click.echo(f"Error creating project: {str(e)}", err=True)
+        sys.exit(1)
 
 if __name__ == '__main__':
     cli()
