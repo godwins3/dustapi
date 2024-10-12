@@ -15,6 +15,10 @@ from .sessions import SessionManager
 from .jwt import JWTHandler
 from .openapi import OpenAPI
 from .swagger_ui import SwaggerUI
+# from .sse import SSE  # Import the SSE class we implemented
+from goha.sse_engine import SSEEngine
+# from .web_sockets import WebSocketRouter
+from .web_sockets import WebSocketRouter
 
 # Create a context variable to store the request
 request_context = contextvars.ContextVar('request')
@@ -34,6 +38,7 @@ class Dust:
         self.session_interface = SessionManager(self.secret_key)
         self.jwt_handler = JWTHandler(jwt_secret_key)
         self.openapi = OpenAPI(title="dustapi Framework API", version="0.0.5", description="API documentation for dustapi Framework")
+        self.sse = SSEEngine()  # Initialize the SSE object
         
         # Middleware to serve static files
         self.shared_data = SharedDataMiddleware(self.wsgi_app, {
@@ -45,6 +50,10 @@ class Dust:
         
         self.http_thread = None
         self.stop_event = threading.Event()
+        
+        self.websocket_router = WebSocketRouter()
+        self.http_server = None
+        self.websocket_server = None
 
     def setup_logger(self, log_file):
         logger = logging.getLogger('dustapi_logger')
@@ -161,39 +170,72 @@ class Dust:
 
     def stop(self):
         self.stop_event.set()
-        if self.http_thread:
-            self.http_thread.join()
-            self.logger.info('HTTP task joined successfully')
+        if self.http_server:
+            self.http_server.shutdown()
+        if self.websocket_server:
+            self.websocket_router.stop_server()
         self.logger.info('Dust server gracefully stopped')
 
-    def run(self, host='localhost', port=5000):
-        def serve_forever(httpd):
-            while not self.stop_event.is_set():
-                httpd.handle_request()
-
+    def run(self, host='localhost', port=5000, websocket_port=5001):
         def run_http():
             with make_server(host, port, self) as httpd:
-                self.logger.info(f"Serving on {host}:{port}")
-                serve_forever(httpd)
+                self.http_server = httpd
+                self.logger.info(f"Serving HTTP on {host}:{port}")
+                while not self.stop_event.is_set():
+                    httpd.handle_request()
+
+        def run_websocket():
+            asyncio.set_event_loop(asyncio.new_event_loop())
+            loop = asyncio.get_event_loop()
+            self.websocket_server = loop.run_until_complete(self.websocket_router.start_server(host, websocket_port))
+            self.logger.info(f"Serving WebSocket on {host}:{websocket_port}")
+            loop.run_forever()
 
         self.http_thread = threading.Thread(target=run_http)
+        self.websocket_thread = threading.Thread(target=run_websocket)
+
         self.http_thread.start()
+        self.websocket_thread.start()
 
         def handle_sigint(signum, frame):
             self.stop()
 
         signal.signal(signal.SIGINT, handle_sigint)
 
-        def listen_for_q():
-            try:
-                while not self.stop_event.is_set():
-                    if input().strip().lower() == 'q':
-                        self.stop()
-                        break
-            except EOFError:
-                self.stop()
+        try:
+            while not self.stop_event.is_set():
+                if input().strip().lower() == 'q':
+                    self.stop()
+                    break
+        except EOFError:
+            self.stop()
 
-        threading.Thread(target=listen_for_q).start()
+        self.http_thread.join()
+        self.websocket_thread.join()
+
+    def setup_sse(self, key):
+        """
+        Set up the Searchable Symmetric Encryption with the given key.
+        """
+        self.sse.setup(key)
+
+    def sse_encrypt(self, plaintext):
+        """
+        Encrypt the given plaintext using SSE.
+        """
+        return self.sse.encrypt(plaintext)
+
+    def sse_search(self, keyword):
+        """
+        Search for encrypted documents containing the given keyword.
+        """
+        return self.sse.search(keyword)
+
+    def websocket(self, path):
+        def wrapper(handler):
+            self.websocket_router.add_route(path, handler)
+            return handler
+        return wrapper
 
 def get_request():
     return request_context.get()

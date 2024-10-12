@@ -9,8 +9,10 @@
 ############
 
 import json
+from typing import Dict, List, Tuple, Union
+from logging import getLogger
 
-FILE = "[JMAP] "
+# Constants
 SEARCH = "search"
 UPDATE = "update"
 ADD_FILE = "addmail"
@@ -19,6 +21,8 @@ UPDATE_METHOD = "updateEncryptedIndex"
 ADD_FILE_METHOD = "putEncryptedMessage"
 
 JMAP_HEADER = {'Content-Type': 'application/json'} 
+
+logger = getLogger(__name__)
 
 # Notes on JMAP spec from jmap.io/spec
 '''
@@ -82,100 +86,82 @@ JMAP CALLS FOR SSE:
 
 '''
 
-def jmap_header():
+def jmap_header() -> Dict[str, str]:
     return JMAP_HEADER
 
-def pack_search(data, id_num):
+def pack_search(data: List[str], id_num: str) -> str:
     return json.dumps([SEARCH_METHOD, {"query": data}, id_num])
 
-def pack_update(data, id_num):
+def pack_update(data: Dict[str, Union[str, List[str]]], id_num: str) -> str:
     return json.dumps([UPDATE_METHOD, {"index": data}, id_num])
 
-def pack_add_file(data, id_num, filename):
+def pack_add_file(data: str, id_num: str, filename: str) -> str:
     return json.dumps([ADD_FILE_METHOD, {"file": data, "filename": filename}, id_num])
 
-def pack(METHOD, data, id_num, filename=None):
-    FUNC = "jmap.pack"
-    message = None
+def pack(method: str, data: Union[List[str], Dict[str, Union[str, List[str]]], str], id_num: str, filename: str = None) -> str:
+    if not method:
+        logger.error("Must provide a method to jmap.pack")
+        raise ValueError("Must provide a method to jmap.pack")
 
-    if not METHOD:
-        print(FILE + "Must provide a method to " + FUNC)
-        return -1
-
-    if METHOD == SEARCH:
-        message = pack_search(data, id_num)
-
-    elif METHOD == UPDATE:
-        message = pack_update(data, id_num)
-
-    elif METHOD == ADD_FILE:
-        message = pack_add_file(data, id_num, filename)
-
+    if method == SEARCH:
+        return pack_search(data, id_num)
+    elif method == UPDATE:
+        return pack_update(data, id_num)
+    elif method == ADD_FILE:
+        if filename is None:
+            logger.error("Filename is required for ADD_FILE method")
+            raise ValueError("Filename is required for ADD_FILE method")
+        return pack_add_file(data, id_num, filename)
     else:
-        print(FILE + "Unknown METHOD in " + FUNC)
-        return -1
+        logger.error(f"Unknown method in jmap.pack: {method}")
+        raise ValueError(f"Unknown method in jmap.pack: {method}")
 
-    return message
-
-def unpack_search(data):
-
+def unpack_search(data: List[Union[str, Dict[str, List[str]]]]) -> Tuple[str, List[str], str]:
     if data[0] != SEARCH_METHOD:
-        return -1
+        logger.error(f"Invalid method for unpack_search: {data[0]}")
+        raise ValueError(f"Invalid method for unpack_search: {data[0]}")
 
-    method = data[0]
-    id_num = data[2]
+    method, args, id_num = data
+    query = args['query']
 
-    # Limit scope to args (data[1])
-    data = data[1]
-    query = data['query']
+    return method, query, id_num
 
-    return (method, query, id_num)
-
-
-def unpack_update(data):
-    
+def unpack_update(data: List[Union[str, Dict[str, Dict[str, Union[str, List[str]]]], str]]) -> Tuple[str, Dict[str, Union[str, List[str]]], str]:
     if data[0] != UPDATE_METHOD:
-        return -1
+        logger.error(f"Invalid method for unpack_update: {data[0]}")
+        raise ValueError(f"Invalid method for unpack_update: {data[0]}")
 
-    method = data[0]
-    id_num = data[2]
+    method, args, id_num = data
+    new_index = args['index']
 
-    # Limit scope to args (data[1])
-    data = data[1]
-    new_index = data['index']
+    return method, new_index, id_num
 
-    return (method, new_index, id_num)
-
-def unpack_add_file(data):
-
+def unpack_add_file(data: List[Union[str, Dict[str, str], str]]) -> Tuple[str, str, str, str]:
     if data[0] != ADD_FILE_METHOD:
-        return -1
+        logger.error(f"Invalid method for unpack_add_file: {data[0]}")
+        raise ValueError(f"Invalid method for unpack_add_file: {data[0]}")
 
-    method = data[0]
-    id_num = data[2]
+    method, args, id_num = data
+    file_data = args['file']
+    filename = args['filename']
 
-    # Limit scope to args (data[1])
-    data = data[1]
+    return method, file_data, filename, id_num
 
-    file = data['file']
-    filename = data['filename']
-
-    return (method, file, filename, id_num)
-
-def unpack(METHOD, data):
-    FUNC = "jmap.unpack"
-
-    if not METHOD:
-        print(FILE + "Must provide a method to " + FUNC)
-        return -1
+def unpack(method: str, data: List[Union[str, Dict[str, Union[str, List[str]]], str]]) -> Union[Tuple[str, List[str], str], Tuple[str, Dict[str, Union[str, List[str]]], str], Tuple[str, str, str, str]]:
+    if not method:
+        logger.error("Must provide a method to jmap.unpack")
+        raise ValueError("Must provide a method to jmap.unpack")
   
-    if METHOD == SEARCH:
+    if method == SEARCH:
         return unpack_search(data)
-    elif METHOD == UPDATE:
+    elif method == UPDATE:
         return unpack_update(data)
-    elif METHOD == ADD_FILE: 
+    elif method == ADD_FILE: 
         return unpack_add_file(data)
     else:
-        print(FILE + "Unknown METHOD in " + FUNC)
-        return -1
+        logger.error(f"Unknown method in jmap.unpack: {method}")
+        raise ValueError(f"Unknown method in jmap.unpack: {method}")
 
+if __name__ == "__main__":
+    # Add any code here that should run when the script is executed directly
+    pass
