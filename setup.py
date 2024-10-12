@@ -10,7 +10,7 @@ setup(
     packages=find_packages(),
     description='Fast light weight web server',
     long_description=long_description,
-    long_description_content_type="text/markdown",  # Use "text/x-rst" if you have a reStructuredText README
+    long_description_content_type="text/markdown",
     author='Praise G',
     install_requires=[
         'werkzeug',
@@ -21,6 +21,7 @@ setup(
         'pyjwt',
         'typer',
         'pydantic',
+        'pycryptodome',
     ],
     entry_points={
         'console_scripts': [

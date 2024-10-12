@@ -15,9 +15,7 @@ from .sessions import SessionManager
 from .jwt import JWTHandler
 from .openapi import OpenAPI
 from .swagger_ui import SwaggerUI
-# from .sse import SSE  # Import the SSE class we implemented
-from goha.sse_engine import SSEEngine
-# from .web_sockets import WebSocketRouter
+from .sse_engine import SSEEngine
 from .web_sockets import WebSocketRouter
 
 # Create a context variable to store the request
