@@ -1,0 +1,24 @@
+site_name: DustAPI Documentation
+theme:
+  name: material
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+  - Core Concepts:
+    - Application: core-concepts/application.md
+    - Routing: core-concepts/routing.md
+    - Responses: core-concepts/responses.md
+  - Features:
+    - WebSockets: features/websockets.md
+    - File Uploads: features/file-uploads.md
+    - Error Handling: features/error-handling.md
+  - Advanced:
+    - Swagger UI: advanced/swagger-ui.md
+    - SSE (Server-Sent Events): advanced/sse.md
+  - API Reference:
+    - Dust Class: api-reference/dust.md
+    - Responses: api-reference/responses.md
+  - Contributing: contributing.md
+
