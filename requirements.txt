@@ -6,3 +6,4 @@ setuptools==74.1.2
 typer==0.12.5
 Werkzeug==3.0.4
 websockets==13.0.1
+pycryptodome==3.19.0

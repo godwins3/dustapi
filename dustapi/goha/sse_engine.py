@@ -7,34 +7,17 @@
 #
 ############
 
-import socket
 import os
-import sys
-sys.path.append(os.path.realpath('../jmap'))
-# from crypto.hash import hmac
-from Crypto.Hash import HMAC
-from Crypto.Hash import SHA256
-from Crypto.Cipher import AES
-import unicodedata
 import binascii
-import anydbm
+import dbm
 import string
-import json
-from flask import Flask
-from flask import request
-from flask import render_template
-from flask import jsonify
-from werkzeug import secure_filename
-import jmap
 from typing import List, Tuple, Dict, Any
+from Crypto.Hash import HMAC, SHA256
+from Crypto.Cipher import AES
+from dustapi.responses import JsonResponse
+from dustapi.helpers import secure_filename
 
-app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'mail'
-app.config['ALLOWED_EXTENSIONS'] = set(['txt', 'pdf', 'png', 'jpg', 
-                                        'jpeg', 'gif'])
-DEBUG = 1
-
-# CMD list
+# Constants
 UPDATE = "update"
 SEARCH = "search"
 ADD_FILE = "addmail"
@@ -49,11 +32,7 @@ HEADERS = ["from", "sent", "date", "to", "subject", "cc"]
 
 DELIMETER = "++?"
 
-########
-#
-# SSE_Server
-#
-########
+DEBUG = 1
 
 class SSEEngine:
     def __init__(self, upload_folder: str, allowed_extensions: set):
@@ -62,9 +41,10 @@ class SSEEngine:
         self.index = None  # We'll initialize this when needed
 
     def initialize_index(self):
-        self.index = anydbm.open("index", "c")
+        self.index = dbm.open("index", "c")
 
     def add_mail(self, file: bytes, filename: str, id_num: str) -> Dict[str, str]:
+        filename = secure_filename(filename)
         path = os.path.join(self.upload_folder, filename)
         with open(path, "wb") as f:
             f.write(file)
@@ -141,9 +121,15 @@ class SSEEngine:
         hmac = HMAC.new(k.encode(), data.encode(), SHA256)
         return hmac.hexdigest()
 
-# Depricated in favor of new_get(), used with new index structure
-def get(index_n, k1, count):
+    def response(self, event_generator):
+        async def streaming_response():
+            async for event in event_generator:
+                yield event
 
+        return JsonResponse(streaming_response())
+
+# The following functions are kept for reference but are not used in the class
+def get(index_n, k1, count):
     cc = 0
     while cc < count:
         F = PRF(k1, str(cc))
@@ -156,35 +142,25 @@ def get(index_n, k1, count):
         cc = cc + 1
     return 0
 
-# FIXME: But maybe not. This may be the only somewhat sane addition for the
-# header search.  Could be joined with get(), but is distinct enough that
-# it may be best to keep them separate.
 def get_header(index_n, k1, header):
-
     F = PRF(k1, header)
     if (DEBUG > 1): 
         print("index key = " + index_n[0])
         print("PRF of k1 and %s = %s\n" % (header, F))
     if F == index_n[0]:
         return index_n[1]
-
     return 0
 
 def get_index_len(index):
-
-    # TODO: crappy hack for now. Need to get size of index,
-    # but I'm not sure what the best method is. So for now, 
-    # just iterate through and grab the count.
     count = 0
-    for k, v in index.iteritems():
+    for k, v in index.items():
         count = count + 1
         if (DEBUG > 1):
             print("K: " + k)
             print("V: " + v)
             print("\n")
-
     return count
 
-
-if __name__ == '__main__':
-    app.run(debug=True)
+def PRF(k: str, data: str) -> str:
+    hmac = HMAC.new(k.encode(), data.encode(), SHA256)
+    return hmac.hexdigest()
