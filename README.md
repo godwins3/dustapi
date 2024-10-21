@@ -2,8 +2,6 @@
 
 DustAPI is a lightweight web framework written in Python, designed to be simple, efficient, and easy to use. It provides basic routing and response handling, making it an excellent choice for learning about web frameworks or building small to medium-sized web applications.
 
-![dustAPI logo](./dustAPI.svg)
-
 ## Features
 
 - Simple and intuitive routing
