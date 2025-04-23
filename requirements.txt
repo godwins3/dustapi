@@ -2,8 +2,8 @@ click==8.1.7
 Jinja2==3.1.4
 mkdocs==1.6.1
 pydantic==2.9.2
-setuptools==75.1.0
 typer==0.15.1
+setuptools==75.6.0
 Werkzeug==3.0.4
-websockets==13.1
-pycryptodome==3.19.0
+websockets==14.1
+pycryptodome==3.21.0
